@@ -6,12 +6,14 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { AppComponent } from './app.component';
+import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 
 FullCalendarModule.registerPlugins([
   dayGridPlugin,
   timeGridPlugin,
   listPlugin,
-  interactionPlugin
+  interactionPlugin,
+  resourceTimelinePlugin,
 ])
 
 @NgModule({

@@ -1,23 +1,32 @@
-import { Component } from '@angular/core';
-import { CalendarOptions, DateSelectArg, EventClickArg, EventApi } from '@fullcalendar/angular';
+import { Component, OnInit } from '@angular/core';
+import { CalendarOptions, DateSelectArg, EventClickArg, EventApi, Calendar } from '@fullcalendar/angular';
 import { INITIAL_EVENTS, createEventId } from './event-utils';
+import { ResourceInput } from '@fullcalendar/resource-common';
+import { DateTimeFormatter, LocalDateTime, ZonedDateTime } from '@js-joda/core';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+
+  resources: ResourceInput[] = [];
+  currentEvents: EventApi[] = [];
+  calendarInst?: Calendar;
 
   calendarVisible = true;
   calendarOptions: CalendarOptions = {
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+      right: 'resourceTimelineDay, resourceTimelineWeek, resourceTimelineMonth'
     },
-    initialView: 'dayGridMonth',
+    initialView: 'resourceTimelineDay',
+    schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
     initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+    resources: this.resources,
+    nowIndicator: true,
     weekends: true,
     editable: true,
     selectable: true,
@@ -32,7 +41,22 @@ export class AppComponent {
     eventRemove:
     */
   };
-  currentEvents: EventApi[] = [];
+
+  ngOnInit(): void {
+    const calendarEl = document.getElementById('calendar')!;
+    this.calendarInst = new Calendar(calendarEl);
+
+    for (let i = 0; i < 5; i++) {
+      this.resources[i] = {
+        id: `${i}`,
+        title: `Stream ${i}`,
+      }
+    }
+  }
+
+  private get calendar(): Calendar {
+    return this.calendarInst!;
+  }
 
   handleCalendarToggle() {
     this.calendarVisible = !this.calendarVisible;
@@ -52,6 +76,7 @@ export class AppComponent {
     if (title) {
       calendarApi.addEvent({
         id: createEventId(),
+        resourceId: selectInfo.resource?.id,
         title,
         start: selectInfo.startStr,
         end: selectInfo.endStr,
@@ -70,4 +95,31 @@ export class AppComponent {
     this.currentEvents = events;
   }
 
+  scrollToNow() {
+    ////////////////////////////////////////////////////////////////////////
+    // Just time
+    ////////////////////////////////////////////////////////////////////////
+    //const time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+    ////////////////////////////////////////////////////////////////////////
+    // ISO 8601
+    ////////////////////////////////////////////////////////////////////////
+    const time = ZonedDateTime.now().withFixedOffsetZone().toString();
+
+    ////////////////////////////////////////////////////////////////////////
+    // Object
+    ////////////////////////////////////////////////////////////////////////
+    //    const now = ZonedDateTime.now();
+    //    const time = {
+    //      year: now.year(),
+    //      month: now.monthValue(),
+    //      day: now.dayOfMonth(),
+    //      hour: now.hour(),
+    //      minute: now.minute(),
+    //      second: now.second()
+    //    };
+
+    console.debug("Scroll to time", { time });
+    this.calendar.scrollToTime(time);
+  }
 }

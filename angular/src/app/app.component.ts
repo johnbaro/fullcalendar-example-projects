@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CalendarOptions, DateSelectArg, EventClickArg, EventApi, Calendar } from '@fullcalendar/angular';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { CalendarOptions, DateSelectArg, EventClickArg, EventApi, Calendar, FullCalendarComponent } from '@fullcalendar/angular';
 import { INITIAL_EVENTS, createEventId } from './event-utils';
 import { ResourceInput } from '@fullcalendar/resource-common';
 import { DateTimeFormatter, LocalDateTime, ZonedDateTime } from '@js-joda/core';
@@ -9,7 +9,8 @@ import { DateTimeFormatter, LocalDateTime, ZonedDateTime } from '@js-joda/core';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
   resources: ResourceInput[] = [];
   currentEvents: EventApi[] = [];
@@ -43,8 +44,6 @@ export class AppComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    const calendarEl = document.getElementById('calendar')!;
-    this.calendarInst = new Calendar(calendarEl);
 
     for (let i = 0; i < 5; i++) {
       this.resources[i] = {
@@ -52,6 +51,10 @@ export class AppComponent implements OnInit {
         title: `Stream ${i}`,
       }
     }
+  }
+
+  ngAfterViewInit(): void {
+    this.calendarInst = this.calendarComponent.getApi();
   }
 
   private get calendar(): Calendar {
@@ -99,12 +102,13 @@ export class AppComponent implements OnInit {
     ////////////////////////////////////////////////////////////////////////
     // Just time
     ////////////////////////////////////////////////////////////////////////
-    //const time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    // Working 2022-06-06 15:04:01
+    const time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
     ////////////////////////////////////////////////////////////////////////
     // ISO 8601
     ////////////////////////////////////////////////////////////////////////
-    const time = ZonedDateTime.now().withFixedOffsetZone().toString();
+    //const time = ZonedDateTime.now().withFixedOffsetZone().toString();
 
     ////////////////////////////////////////////////////////////////////////
     // Object
